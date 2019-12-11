@@ -100,8 +100,12 @@ class Item(Area):
         return self.transport.POST(url="/item/app/%d/filter/" % app_id, body=attributes,
                                    type="application/json", **kwargs)
 
-    def filter_by_view(self, app_id, view_id):
-        return self.transport.POST(url="/item/app/{}/filter/{}".format(app_id, view_id))
+    def filter_by_view(self, app_id, view_id, attributes):
+        if not isinstance(attributes, dict):
+            raise TypeError('Must be of type dict')
+        attributes = json.dumps(attributes)
+        return self.transport.POST(url="/item/app/{}/filter/{}".format(app_id, view_id), body=attributes,
+                                   type="application/json")
 
     def find_all_by_external_id(self, app_id, external_id):
         return self.transport.GET(url='/item/app/%d/v2/?external_id=%r' % (app_id, external_id))
@@ -612,4 +616,12 @@ class View(Area):
         attribute_data = json.dumps(attributes)
         return self.transport.PUT(url='/view/{}'.format(view_id),
                                   body=attribute_data, type='application/json')
+
+class Importer(Area):
+  def import_items(self, file_id, app_id, attributes, **kwargs):
+    if not isinstance(attributes, dict):
+      raise TypeError('Must be of type dict')
+    attributes = json.dumps(attributes)
+    return self.transport.POST(url="/importer/%d/item/app/%d" % (file_id, app_id), body=attributes,
+      type="application/json", **kwargs)
 
