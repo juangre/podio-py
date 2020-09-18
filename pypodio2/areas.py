@@ -82,7 +82,7 @@ class Item(Area):
     def find(self, item_id, basic=False, **kwargs):
         """
         Get item
-        
+
         :param item_id: Item ID
         :param basic: ?
         :type item_id: int
@@ -137,7 +137,7 @@ class Item(Area):
         """
         Updates the item using the supplied attributes. If 'silent' is true, Podio will send
         no notifications to subscribed users and not post updates to the stream.
-        
+
         Important: webhooks will still be called.
         """
         if not isinstance(attributes, dict):
@@ -154,6 +154,13 @@ class Item(Area):
                                                                           hook=hook)),
                                      handler=lambda x, y: None)
 
+    def bulk_delete(self, app_id, attributes, silent=False):
+      if not isinstance(attributes, dict):
+          raise TypeError('Must be of type dict')
+      attributes = json.dumps(attributes)
+      return self.transport.POST(url="/item/app/{}/delete{}".format(app_id, self.get_options(silent=silent)),
+                                 body=attributes,
+                                 type="application/json")
 
 class Application(Area):
     def activate(self, app_id):
@@ -255,7 +262,7 @@ class Task(Area):
     def delete(self, task_id):
         """
         Deletes the app with the given id.
-        
+
         :param task_id: Task ID
         :type task_id: str or int
         """
@@ -352,7 +359,7 @@ class Space(Area):
     def create(self, attributes):
         """
         Create a new space
-        
+
         :param attributes: Refer to API. Pass in argument as dictionary
         :type attributes: dict
         :return: Details of newly created space
@@ -625,3 +632,6 @@ class Importer(Area):
     return self.transport.POST(url="/importer/%d/item/app/%d" % (file_id, app_id), body=attributes,
       type="application/json", **kwargs)
 
+class Batch(Area):
+  def get(self, batch_id):
+    return self.transport.GET(url='/batch/%s' % batch_id)
